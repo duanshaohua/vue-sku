@@ -1,60 +1,58 @@
-<style lang="sass" scoped>
-.flex
-  display: flex
-
-  .guide_coefficient
-    margin-right: 20px
-</style>
-
-<template lang="pug">
-.container
-  .flex
-    el-form.guide_coefficient(:inline="true" :model="coefficient")
-      el-form-item(label="指导价倍数" prop="guide_coefficient")
-        el-input-number(
-          :step="0.1"
-          :min="1"
-          :precision="2"
-          v-model="coefficient.guide_coefficient"
-        )
-      el-form-item
-        el-button(type="primary" @click="setGuideCoefficient") 批量设置指导价倍数
-
-    el-form(:inline="true" :model="coefficient")
-      el-form-item(label="标价倍数" prop="purchase_coefficient")
-        el-input-number(
-          :step="0.1"
-          :min="1"
-          :precision="2"
-          v-model="coefficient.purchase_coefficient"
-        )
-      el-form-item
-        el-button(type="primary" @click="setPurchaseCoefficient") 批量设置标价倍数
-
-  egrid(
-    border
-    max-height="800"
-    v-bind="$attrs"
-    v-on="$listeners"
-    :data="data"
-    :columns="columns"
-    :columns-props="columnsProps"
-  )
+<template>
+  <div class="container">
+    <div class="flex">
+      <el-form class="guide_coefficient" :inline="true" :model="coefficient">
+        <el-form-item label="指导价倍数" prop="guide_coefficient">
+          <el-input-number
+            :step="0.1"
+            :min="1"
+            :precision="2"
+            v-model="coefficient.guide_coefficient"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="setGuideCoefficient">批量设置指导价倍数</el-button>
+        </el-form-item>
+      </el-form>
+      <el-form :inline="true" :model="coefficient">
+        <el-form-item label="标价倍数" prop="purchase_coefficient">
+          <el-input-number
+            :step="0.1"
+            :min="1"
+            :precision="2"
+            v-model="coefficient.purchase_coefficient"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="setPurchaseCoefficient">批量设置标价倍数</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <egrid
+      border
+      max-height="800"
+      v-bind="$attrs"
+      v-on="$listeners"
+      :data="data"
+      :columns="columns"
+      :columns-props="columnsProps"
+    />
+  </div>
 </template>
 
 <script>
-import Vue from 'vue'
-import { flatten } from '../utils/sku'
-import { diffArary } from '../utils'
+import Vue from 'vue';
+import { flatten } from '../utils/sku';
+import { diffArary } from '../utils';
 
 export default {
   props: {
     skusData: {
       type: Array,
       default() {
-        return []
-      },
-    },
+        return [];
+      }
+    }
   },
 
   computed: {
@@ -79,19 +77,19 @@ export default {
             `${total}${prev.k_id}-${prev.v_id}${
               index === item.skus.length - 1 ? '' : '_'
             }`,
-          '',
-        ),
-      }))
+          ''
+        )
+      }));
     },
 
     columns() {
       const specList = this.skusData.map(item => ({
         label: item.value,
         formater(row) {
-          const sku = row.skus.find(sku => sku.k === item.value)
-          return sku.v
-        },
-      }))
+          const sku = row.skus.find(sku => sku.k === item.value);
+          return sku.v;
+        }
+      }));
       return [
         ...specList,
         {
@@ -104,11 +102,12 @@ export default {
                 <ElInput
                   placeholder="请输入规格"
                   value={this.row.format}
+                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
                   oninput={e => (this.row.format = e.trim())}
-                ></ElInput>
-              )
-            },
-          }),
+                />
+              );
+            }
+          })
         },
         {
           label: '厂家指导价',
@@ -124,11 +123,12 @@ export default {
                   min={0}
                   controls={false}
                   precision={0}
+                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
                   oninput={e => (this.row.guide_price = e)}
-                ></ElInputNumber>
-              )
-            },
-          }),
+                />
+              );
+            }
+          })
         },
         {
           label: '进价',
@@ -144,11 +144,12 @@ export default {
                   min={0}
                   controls={false}
                   precision={0}
+                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
                   oninput={e => (this.row.purchase_price = e)}
-                ></ElInputNumber>
-              )
-            },
-          }),
+                />
+              );
+            }
+          })
         },
         {
           label: '标价',
@@ -164,14 +165,15 @@ export default {
                   min={0}
                   controls={false}
                   precision={0}
+                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
                   oninput={e => (this.row.sell_price = e)}
-                ></ElInputNumber>
-              )
-            },
-          }),
-        },
-      ]
-    },
+                />
+              );
+            }
+          })
+        }
+      ];
+    }
   },
 
   watch: {
@@ -179,45 +181,45 @@ export default {
       deep: true,
       immediate: true,
       handler(newSkus, oldSkus) {
-        if (!newSkus.length) return (this.data = [])
-        if (!oldSkus || !oldSkus.length) return this.initData(newSkus)
+        if (!newSkus.length) return (this.data = []);
+        if (!oldSkus || !oldSkus.length) return this.initData(newSkus);
         if (newSkus.length === oldSkus.length) {
           // 当规格名和规格值数量未发生变化，更新 skus 即可
           return (this.data = newSkus.map((item, index) => ({
             ...this.data[index],
-            ...item,
-          })))
+            ...item
+          })));
         }
 
         // 当规格名的数量发生了变化
         if (newSkus[0].skus.length !== oldSkus[0].skus.length)
-          return this.initData(newSkus)
+          return this.initData(newSkus);
 
-        const diffIds = this.diffIds(newSkus, oldSkus)
+        const diffIds = this.diffIds(newSkus, oldSkus);
         if (newSkus.length > oldSkus.length) {
           // 当添加了规格值
-          let data = []
+          let data = [];
           newSkus.forEach(item => {
-            const sku = this.data.find(_item => _item.ids === item.ids)
+            const sku = this.data.find(_item => _item.ids === item.ids);
             if (sku) {
-              data.push(sku)
+              data.push(sku);
             } else {
               data.push({
                 ...item,
                 format: '',
                 guide_price: undefined,
                 purchase_price: undefined,
-                sell_price: undefined,
-              })
+                sell_price: undefined
+              });
             }
-          })
-          this.data = data
+          });
+          this.data = data;
         } else {
           // 当删除了规格值
-          this.data = this.data.filter(_item => !diffIds.includes(_item.ids))
+          this.data = this.data.filter(_item => !diffIds.includes(_item.ids));
         }
-      },
-    },
+      }
+    }
   },
 
   data: () => ({
@@ -239,20 +241,20 @@ export default {
 
     coefficient: {
       purchase_coefficient: 0,
-      guide_coefficient: 0,
+      guide_coefficient: 0
     },
     columnsProps: {
       align: 'center',
-      minWidth: 100,
-    },
+      minWidth: 100
+    }
   }),
 
   methods: {
     diffIds(skusList1, skusList2) {
       // 两个数据的 ids 进行相差
-      skusList1 = skusList1.map(item => item.ids)
-      skusList2 = skusList2.map(item => item.ids)
-      return diffArary(skusList1, skusList2)
+      skusList1 = skusList1.map(item => item.ids);
+      skusList2 = skusList2.map(item => item.ids);
+      return diffArary(skusList1, skusList2);
     },
 
     initData(skusList) {
@@ -262,25 +264,33 @@ export default {
         format: '',
         guide_price: undefined,
         purchase_price: undefined,
-        sell_price: undefined,
-      }))
+        sell_price: undefined
+      }));
     },
 
     setGuideCoefficient() {
-      const guide_coefficient = this.coefficient.guide_coefficient
+      const guide_coefficient = this.coefficient.guide_coefficient;
       this.data = this.data.map(item => ({
         ...item,
-        purchase_price: (item.guide_price || 0) * guide_coefficient,
-      }))
+        purchase_price: (item.guide_price || 0) * guide_coefficient
+      }));
     },
 
     setPurchaseCoefficient() {
-      const purchase_coefficient = this.coefficient.purchase_coefficient
+      const purchase_coefficient = this.coefficient.purchase_coefficient;
       this.data = this.data.map(item => ({
         ...item,
-        sell_price: (item.purchase_price || 0) * purchase_coefficient,
-      }))
-    },
-  },
-}
+        sell_price: (item.purchase_price || 0) * purchase_coefficient
+      }));
+    }
+  }
+};
 </script>
+
+<style lang="sass" scoped>
+.flex
+  display: flex
+
+  .guide_coefficient
+    margin-right: 20px
+</style>
