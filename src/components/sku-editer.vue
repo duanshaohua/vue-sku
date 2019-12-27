@@ -32,7 +32,7 @@
           class="input"
           suffix-icon="el-icon-plus"
           v-model="addValues[index]"
-          placeholder="多个产品属性以空格隔开"
+          placeholder="多个值以空格隔开"
           @keyup.native.enter="addOption(index)"
           @blur="addOption(index)"
         />

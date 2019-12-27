@@ -30,21 +30,27 @@
     </div>
     <egrid
       border
-      max-height="800"
+      max-height="500"
       v-bind="$attrs"
       v-on="$listeners"
       :data="data"
       :columns="columns"
       :columns-props="columnsProps"
+      highlight-current-row
     />
   </div>
 </template>
 
 <script>
+import Vue from 'vue';
+import Egrid from 'egrid';
 import { flatten } from '../utils/sku';
 import { diffArary } from '../utils';
 
 export default {
+  components: {
+    Egrid
+  },
   model: {
     prop: 'value',
     event: 'change'
@@ -59,18 +65,6 @@ export default {
     skusData: {
       type: Array,
       default() {
-        return [];
-      }
-    },
-    fields: {
-      type: Object,
-      default: () => {
-        return {};
-      }
-    },
-    customColumns: {
-      type: Array,
-      default: () => {
         return [];
       }
     }
@@ -184,14 +178,151 @@ export default {
     //   }
     // ]
 
+    columnsProps: {
+      align: 'center',
+      minWidth: 100
+    },
     coefficient: {
       purchase_coefficient: 0,
       guide_coefficient: 0
     },
-    columnsProps: {
-      align: 'center',
-      minWidth: 100
-    }
+    fields: {
+      name: '',
+      code: '',
+      barcode: '',
+      purchasePrice: 0,
+      guidePrice: 0,
+      sellingPrice: 0,
+      deliveryPrice: 0
+    },
+    customColumns: [
+      {
+        label: '规格名称',
+        width: 230,
+        component: Vue.extend({
+          props: ['row'],
+          render(h) {
+            var self = this;
+            return h('el-input', {
+              attrs: {
+                placeholder: '规格名称',
+                value: self.row.name
+              },
+              on: {
+                input: e => (self.row.name = e.trim())
+              }
+            });
+          }
+        })
+      },
+      {
+        label: '规格编码',
+        width: 230,
+        component: Vue.extend({
+          props: ['row'],
+          render(h) {
+            var self = this;
+            return h('el-input', {
+              attrs: {
+                placeholder: '规格编码',
+                value: self.row.code
+              },
+              on: {
+                input: e => (self.row.code = e.trim())
+              }
+            });
+          }
+        })
+      },
+      {
+        label: '建议进价',
+        width: 230,
+        component: Vue.extend({
+          props: ['row'],
+          render(h) {
+            var self = this;
+            return h('el-input-number', {
+              props: {
+                value: self.row.purchasePrice,
+                step: 0.01,
+                min: 0,
+                controls: false,
+                precision: 2
+              },
+              on: {
+                input: e => (self.row.purchasePrice = e)
+              }
+            });
+          }
+        })
+      },
+      {
+        label: '厂家指导价',
+        width: 230,
+        component: Vue.extend({
+          props: ['row'],
+          render(h) {
+            var self = this;
+            return h('el-input-number', {
+              props: {
+                value: self.row.guidePrice,
+                step: 0.01,
+                min: 0,
+                controls: false,
+                precision: 2
+              },
+              on: {
+                input: e => (self.row.guidePrice = e)
+              }
+            });
+          }
+        })
+      },
+      {
+        label: '建议售价',
+        width: 230,
+        component: Vue.extend({
+          props: ['row'],
+          render(h) {
+            var self = this;
+            return h('el-input-number', {
+              props: {
+                value: self.row.sellingPrice,
+                step: 0.01,
+                min: 0,
+                controls: false,
+                precision: 2
+              },
+              on: {
+                input: e => (self.row.sellingPrice = e)
+              }
+            });
+          }
+        })
+      },
+      {
+        label: '建议配送价',
+        width: 230,
+        component: Vue.extend({
+          props: ['row'],
+          render(h) {
+            var self = this;
+            return h('el-input-number', {
+              props: {
+                value: self.row.deliveryPrice,
+                step: 0.01,
+                min: 0,
+                controls: false,
+                precision: 2
+              },
+              on: {
+                input: e => (self.row.deliveryPrice = e)
+              }
+            });
+          }
+        })
+      }
+    ]
   }),
 
   methods: {
@@ -203,18 +334,29 @@ export default {
     },
 
     initData(skusList) {
-      this.data = skusList.map(item => ({
-        ...item,
-        // 初始化属性
-        ...this.fields
-      }));
+      this.data = skusList.map(item => {
+        this.fields.name = this.skuName(item.skus);
+        return {
+          ...item,
+          // 初始化属性
+          ...this.fields
+        };
+      });
+    },
+
+    skuName(skus) {
+      return skus
+        .map(item => {
+          return item.v;
+        })
+        .join('');
     },
 
     setGuideCoefficient() {
       const guide_coefficient = this.coefficient.guide_coefficient;
       this.data = this.data.map(item => ({
         ...item,
-        purchase_price: (item.guide_price || 0) * guide_coefficient
+        purchasePrice: (item.guidePrice || 0) * guide_coefficient
       }));
     },
 
@@ -222,7 +364,7 @@ export default {
       const purchase_coefficient = this.coefficient.purchase_coefficient;
       this.data = this.data.map(item => ({
         ...item,
-        sell_price: (item.purchase_price || 0) * purchase_coefficient
+        sellingPrice: (item.purchasePrice || 0) * purchase_coefficient
       }));
     }
   }
@@ -230,6 +372,8 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.container
+  padding: 20px 0px;
 .flex
   display: flex
 
