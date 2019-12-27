@@ -9,8 +9,12 @@
         @click="selectSku(index, option)"
       >{{option.value}}</el-button>
     </div>
+    <div
+      class="spec_title"
+      v-for="(sku, index) in activeSku"
+      :key="index"
+    >{{sku.spec.value}}：{{sku.option.value}}</div>
   </div>
-  <!-- //- .spec_title(v-for="(sku, index) in activeSku" :key="index") {{sku.spec.value}}：{{sku.option.value}} -->
 </template>
 
 <script>

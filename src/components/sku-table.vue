@@ -41,15 +41,36 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { flatten } from '../utils/sku';
 import { diffArary } from '../utils';
 
 export default {
+  model: {
+    prop: 'value',
+    event: 'change'
+  },
   props: {
+    value: {
+      type: Array,
+      default() {
+        return [];
+      }
+    },
     skusData: {
       type: Array,
       default() {
+        return [];
+      }
+    },
+    fields: {
+      type: Object,
+      default: () => {
+        return {};
+      }
+    },
+    customColumns: {
+      type: Array,
+      default: () => {
         return [];
       }
     }
@@ -85,94 +106,14 @@ export default {
     columns() {
       const specList = this.skusData.map(item => ({
         label: item.value,
+        fixed: true,
+        width: 100,
         formater(row) {
           const sku = row.skus.find(sku => sku.k === item.value);
           return sku.v;
         }
       }));
-      return [
-        ...specList,
-        {
-          label: '规格',
-          width: 120,
-          component: Vue.extend({
-            props: ['row'],
-            render() {
-              return (
-                <ElInput
-                  placeholder="请输入规格"
-                  value={this.row.format}
-                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-                  oninput={e => (this.row.format = e.trim())}
-                />
-              );
-            }
-          })
-        },
-        {
-          label: '厂家指导价',
-          width: 150,
-          component: Vue.extend({
-            props: ['row'],
-            render() {
-              return (
-                <ElInputNumber
-                  placeholder="请输入厂家指导价"
-                  value={this.row.guide_price}
-                  step={1}
-                  min={0}
-                  controls={false}
-                  precision={0}
-                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-                  oninput={e => (this.row.guide_price = e)}
-                />
-              );
-            }
-          })
-        },
-        {
-          label: '进价',
-          width: 150,
-          component: Vue.extend({
-            props: ['row'],
-            render() {
-              return (
-                <ElInputNumber
-                  placeholder="请输入进价"
-                  value={this.row.purchase_price}
-                  step={1}
-                  min={0}
-                  controls={false}
-                  precision={0}
-                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-                  oninput={e => (this.row.purchase_price = e)}
-                />
-              );
-            }
-          })
-        },
-        {
-          label: '标价',
-          width: 150,
-          component: Vue.extend({
-            props: ['row'],
-            render() {
-              return (
-                <ElInputNumber
-                  placeholder="请输入标价"
-                  value={this.row.sell_price}
-                  step={1}
-                  min={0}
-                  controls={false}
-                  precision={0}
-                  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-                  oninput={e => (this.row.sell_price = e)}
-                />
-              );
-            }
-          })
-        }
-      ];
+      return [...specList, ...this.customColumns];
     }
   },
 
@@ -206,10 +147,7 @@ export default {
             } else {
               data.push({
                 ...item,
-                format: '',
-                guide_price: undefined,
-                purchase_price: undefined,
-                sell_price: undefined
+                ...this.fields
               });
             }
           });
@@ -218,6 +156,13 @@ export default {
           // 当删除了规格值
           this.data = this.data.filter(_item => !diffIds.includes(_item.ids));
         }
+      }
+    },
+    data: {
+      deep: true,
+      immediate: true,
+      handler(newVal) {
+        this.$emit('change', newVal);
       }
     }
   },
@@ -261,10 +206,7 @@ export default {
       this.data = skusList.map(item => ({
         ...item,
         // 初始化属性
-        format: '',
-        guide_price: undefined,
-        purchase_price: undefined,
-        sell_price: undefined
+        ...this.fields
       }));
     },
 
